@@ -27,21 +27,15 @@ router.get('/:id', (req,res)=>{
     });
 });
 
-router.post('/', checkCarPayload, (req,res)=> {
-    Cars.create({ vin: req.body.vin , make: req.body.make , model: req.body.model , mileage: req.body.mileage, title: req.body.title, transmission: req.body.transmission})
-    .then(newCarEntry => {
-        res.status(201).json(newCarEntry);
-    })
-    .catch(err => {
-        res.status(500).json({ message: 'Error adding the car', })
-    });
+router.post('/', checkCarPayload, checkVinNumberValid, checkVinNumberUnique, async (req,res,next)=> {
+    try{
+        const car = await Cars.create(req.body)
+        res.json(car)
+    }catch(err){
+        next(err)
+    }
 });
 
-router.use((err, req, res, next) => { // eslint-disable-line
-    res.status(err.status || 500).json({
-      message: err.message,
-      stack: err.stack,
-    })
-  })
+
 
 module.exports = router;
